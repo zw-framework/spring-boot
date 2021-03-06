@@ -246,6 +246,8 @@ public class SpringApplication {
 
 	private boolean lazyInitialization = false;
 
+	private String environmentPrefix;
+
 	private ApplicationContextFactory applicationContextFactory = ApplicationContextFactory.DEFAULT;
 
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
@@ -349,7 +351,7 @@ public class SpringApplication {
 
 	private DefaultBootstrapContext createBootstrapContext() {
 		DefaultBootstrapContext bootstrapContext = new DefaultBootstrapContext();
-		this.bootstrappers.forEach((initializer) -> initializer.intitialize(bootstrapContext));
+		this.bootstrappers.forEach((initializer) -> initializer.initialize(bootstrapContext));
 		return bootstrapContext;
 	}
 
@@ -362,6 +364,9 @@ public class SpringApplication {
 		listeners.environmentPrepared(bootstrapContext, environment);
 		DefaultPropertiesPropertySource.moveToEnd(environment);
 		configureAdditionalProfiles(environment);
+		if (environment.getProperty("spring.main.environment-prefix") != null) {
+			throw new IllegalStateException("Environment prefix cannot be set via properties.");
+		}
 		bindToSpringApplication(environment);
 		if (!this.isCustomEnvironment) {
 			environment = new EnvironmentConverter(getClassLoader()).convertEnvironmentIfNecessary(environment,
@@ -513,7 +518,9 @@ public class SpringApplication {
 	 */
 	protected void configurePropertySources(ConfigurableEnvironment environment, String[] args) {
 		MutablePropertySources sources = environment.getPropertySources();
-		DefaultPropertiesPropertySource.ifNotEmpty(this.defaultProperties, sources::addLast);
+		if (!CollectionUtils.isEmpty(this.defaultProperties)) {
+			DefaultPropertiesPropertySource.addOrMerge(this.defaultProperties, sources);
+		}
 		if (this.addCommandLineProperties && args.length > 0) {
 			String name = CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME;
 			if (sources.contains(name)) {
@@ -1172,6 +1179,14 @@ public class SpringApplication {
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
 		this.resourceLoader = resourceLoader;
+	}
+
+	public String getEnvironmentPrefix() {
+		return this.environmentPrefix;
+	}
+
+	public void setEnvironmentPrefix(String environmentPrefix) {
+		this.environmentPrefix = environmentPrefix;
 	}
 
 	/**

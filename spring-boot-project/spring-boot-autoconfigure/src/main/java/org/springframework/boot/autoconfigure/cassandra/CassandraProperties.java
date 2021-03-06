@@ -212,7 +212,7 @@ public class CassandraProperties {
 		 * Timeout to use for internal queries that run as part of the initialization
 		 * process, just after a connection is opened.
 		 */
-		private Duration initQueryTimeout = Duration.ofMillis(500);
+		private Duration initQueryTimeout = Duration.ofSeconds(5);
 
 		public Duration getConnectTimeout() {
 			return this.connectTimeout;
@@ -302,7 +302,7 @@ public class CassandraProperties {
 		/**
 		 * Idle timeout before an idle connection is removed.
 		 */
-		private Duration idleTimeout = Duration.ofSeconds(120);
+		private Duration idleTimeout = Duration.ofSeconds(5);
 
 		/**
 		 * Heartbeat interval after which a message is sent on an idle connection to make
@@ -356,24 +356,24 @@ public class CassandraProperties {
 		 * Maximum number of requests that can be enqueued when the throttling threshold
 		 * is exceeded.
 		 */
-		private int maxQueueSize = 10000;
+		private int maxQueueSize;
 
 		/**
 		 * Maximum number of requests that are allowed to execute in parallel.
 		 */
-		private int maxConcurrentRequests = 10000;
+		private int maxConcurrentRequests;
 
 		/**
 		 * Maximum allowed request rate.
 		 */
-		private int maxRequestsPerSecond = 10000;
+		private int maxRequestsPerSecond;
 
 		/**
 		 * How often the throttler attempts to dequeue requests. Set this high enough that
 		 * each attempt will process multiple entries in the queue, but not delay requests
 		 * too much.
 		 */
-		private Duration drainInterval = Duration.ofMillis(10);
+		private Duration drainInterval;
 
 		public ThrottlerType getType() {
 			return this.type;
